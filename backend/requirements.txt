@@ -8,6 +8,7 @@ alembic
 langgraph
 langgraph-checkpoint-postgres
 psycopg[binary]
+psycopg_pool
 langchain-core
 langchain-openai
 openai
