@@ -41,7 +41,7 @@ export default function ChatWidget({
   }, []);
 
   useEffect(() => {
-    if (autoSendMessage && !autoSentRef.current) {
+    if (autoSendMessage && !autoSentRef.current && messages.length === 0) {
       autoSentRef.current = true;
       handleSend(autoSendMessage);
     }
