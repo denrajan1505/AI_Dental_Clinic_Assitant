@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+sqlalchemy[asyncio]
+asyncpg
+alembic
+langgraph
+langgraph-checkpoint-postgres
+psycopg[binary]
+langchain-core
+langchain-openai
+openai
+python-dotenv
