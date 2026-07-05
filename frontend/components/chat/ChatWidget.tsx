@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getClinicInfo, getDoctors, getHistory, sendMessage } from "@/lib/api";
 import { QuickAction } from "@/lib/quickActions";
 import { ChatMessage, Doctor } from "@/lib/types";
@@ -11,13 +11,23 @@ import WelcomeScreen from "./WelcomeScreen";
 
 const STORAGE_KEY = "dental_assistant_conversation_id";
 
-export default function ChatWidget() {
+export default function ChatWidget({
+  autoSendMessage,
+  onClose,
+}: {
+  autoSendMessage?: string | null;
+  onClose?: () => void;
+}) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoSentRef = useRef(false);
 
   useEffect(() => {
+    // An explicit auto-send message means the visitor just triggered a fresh action (e.g. "Book
+    // Appointment" from the landing page) — start a new conversation rather than resuming an old one.
+    if (autoSendMessage) return;
     const storedId = localStorage.getItem(STORAGE_KEY);
     if (!storedId) return;
     setConversationId(storedId);
@@ -27,7 +37,16 @@ export default function ChatWidget() {
         localStorage.removeItem(STORAGE_KEY);
         setConversationId(null);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (autoSendMessage && !autoSentRef.current) {
+      autoSentRef.current = true;
+      handleSend(autoSendMessage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSendMessage]);
 
   async function handleSend(text: string) {
     setError(null);
@@ -98,10 +117,19 @@ export default function ChatWidget() {
     <div className="mx-auto flex h-[640px] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 shadow-sm dark:border-gray-700">
       <div className="flex items-center gap-3 border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-lg">🦷</div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-base font-semibold">AI Receptionist</h1>
           <p className="text-xs text-green-600">🟢 Online</p>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close chat"
+            className="text-xl leading-none text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          >
+            ×
+          </button>
+        )}
       </div>
       {messages.length === 0 ? (
         <WelcomeScreen onAction={handleQuickAction} />
