@@ -1,3 +1,4 @@
+import difflib
 import uuid
 from datetime import date as date_type
 from datetime import datetime, time, timedelta
@@ -25,6 +26,12 @@ async def find_doctor_by_name(session: AsyncSession, name: str) -> Doctor | None
         select(Doctor).where(Doctor.name.ilike(f"%{name}%"), Doctor.is_active.is_(True))
     )
     return result.scalars().first()
+
+
+async def suggest_doctor_names(session: AsyncSession, name: str, limit: int = 3) -> list[str]:
+    result = await session.execute(select(Doctor.name).where(Doctor.is_active.is_(True)))
+    all_names = [row[0] for row in result.all()]
+    return difflib.get_close_matches(name, all_names, n=limit, cutoff=0.4)
 
 
 async def get_appointments_by_phone(session: AsyncSession, phone: str) -> list[dict]:

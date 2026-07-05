@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from openai import OpenAIError
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import SQLAlchemyError
@@ -26,6 +26,24 @@ class ChatResponse(BaseModel):
     conversation_id: str
     reply: str
     agent: str | None = None
+    ui: dict | None = None
+
+
+def _extract_ui_payload(messages: list) -> dict | None:
+    last_human_idx = None
+    for i in range(len(messages) - 1, -1, -1):
+        if isinstance(messages[i], HumanMessage):
+            last_human_idx = i
+            break
+    if last_human_idx is None:
+        return None
+
+    for msg in messages[last_human_idx + 1 :]:
+        if isinstance(msg, AIMessage) and getattr(msg, "tool_calls", None):
+            for call in msg.tool_calls:
+                if call["name"] == "propose_booking":
+                    return {"type": "booking_summary", **call["args"]}
+    return None
 
 
 @router.post("/api/chat", response_model=ChatResponse)
@@ -57,8 +75,9 @@ async def chat(
 
     reply = result["messages"][-1].content
     agent = result.get("last_agent")
-    logger.info("conversation=%s agent=%s", conversation.id, agent)
+    ui = _extract_ui_payload(result["messages"])
+    logger.info("conversation=%s agent=%s ui=%s", conversation.id, agent, ui.get("type") if ui else None)
 
     await append_message(session, conversation.id, role="assistant", content=reply, agent=agent)
 
-    return ChatResponse(conversation_id=str(conversation.id), reply=reply, agent=agent)
+    return ChatResponse(conversation_id=str(conversation.id), reply=reply, agent=agent, ui=ui)
