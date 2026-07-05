@@ -2,13 +2,14 @@ MANAGER_CLASSIFY_SYSTEM_PROMPT = """You are the intent-classification manager fo
 AI assistant. Classify the patient's latest message into exactly one of:
 
 - receptionist_info: questions about clinic hours, doctors, fees, address, insurance, parking, etc.
-- appointment_action: booking, rescheduling, cancelling, or checking availability for an appointment.
+- appointment_action: booking, rescheduling, cancelling, checking availability, or checking the
+  status of an existing appointment (e.g. "is my appointment booked?", "what appointments do I have?").
 - chitchat: greetings, thanks, small talk.
 - unclear: anything else, or too ambiguous to classify.
 
 If the intent is appointment_action, also extract (only if explicitly mentioned in the conversation):
-the specific action (book / reschedule / cancel / check_availability), doctor_name, preferred_date,
-preferred_time. Leave a field null if it wasn't mentioned.
+the specific action (book / reschedule / cancel / check_availability / check_status), doctor_name,
+preferred_date, preferred_time. Leave a field null if it wasn't mentioned.
 """
 
 MANAGER_DIRECT_REPLY_SYSTEM_PROMPT = """You are the AI assistant for a dental clinic, handling small \

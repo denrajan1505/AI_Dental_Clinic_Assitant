@@ -56,4 +56,23 @@ def build_appointment_tools(session: AsyncSession) -> list:
             return str(exc)
         return f"Appointment {appointment.id} has been cancelled."
 
-    return [check_availability, book_appointment, reschedule_appointment, cancel_appointment]
+    @tool
+    async def check_my_appointments(patient_phone: str) -> str:
+        """Look up a patient's existing appointments by their phone number."""
+        appointments = await svc.get_appointments_by_phone(session, patient_phone)
+        if not appointments:
+            return f"No appointments found for phone number {patient_phone}."
+        lines = [
+            f"- {appt['doctor_name']} on {appt['start_time'].strftime('%Y-%m-%d %H:%M')} "
+            f"({appt['status']}), ID: {appt['appointment_id']}"
+            for appt in appointments
+        ]
+        return "Found the following appointments:\n" + "\n".join(lines)
+
+    return [
+        check_availability,
+        book_appointment,
+        reschedule_appointment,
+        cancel_appointment,
+        check_my_appointments,
+    ]

@@ -27,6 +27,25 @@ async def find_doctor_by_name(session: AsyncSession, name: str) -> Doctor | None
     return result.scalars().first()
 
 
+async def get_appointments_by_phone(session: AsyncSession, phone: str) -> list[dict]:
+    result = await session.execute(
+        select(Appointment, Doctor)
+        .join(Doctor, Appointment.doctor_id == Doctor.id)
+        .join(Patient, Appointment.patient_id == Patient.id)
+        .where(Patient.phone == phone)
+        .order_by(Appointment.start_time)
+    )
+    return [
+        {
+            "appointment_id": str(appointment.id),
+            "doctor_name": doctor.name,
+            "start_time": appointment.start_time.astimezone(CLINIC_TZ),
+            "status": appointment.status,
+        }
+        for appointment, doctor in result.all()
+    ]
+
+
 def _parse_time(value: str) -> time:
     return datetime.strptime(value, "%H:%M").time()
 
