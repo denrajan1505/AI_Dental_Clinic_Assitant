@@ -114,7 +114,7 @@ export default function ChatWidget({
   }
 
   return (
-    <div className="mx-auto flex h-[640px] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 shadow-sm dark:border-gray-700">
+    <div className="mx-auto flex h-[640px] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
       <div className="flex items-center gap-3 border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-lg">🦷</div>
         <div className="flex-1">
