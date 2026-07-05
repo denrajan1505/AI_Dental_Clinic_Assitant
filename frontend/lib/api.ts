@@ -1,4 +1,4 @@
-import { ChatMessage, ChatResponse, ClinicInfo, Doctor } from "./types";
+import { AppointmentRecord, ChatMessage, ChatResponse, ClinicInfo, Doctor } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -34,6 +34,19 @@ export async function getClinicInfo(): Promise<ClinicInfo> {
   const res = await fetch(`${API_BASE_URL}/api/clinic`);
   if (!res.ok) {
     throw new Error(`Failed to load clinic info: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function getAppointments(adminPassword: string): Promise<AppointmentRecord[]> {
+  const res = await fetch(`${API_BASE_URL}/api/appointments`, {
+    headers: { "X-Admin-Password": adminPassword },
+  });
+  if (res.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+  if (!res.ok) {
+    throw new Error(`Failed to load appointments: ${res.status}`);
   }
   return res.json();
 }

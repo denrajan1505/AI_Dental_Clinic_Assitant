@@ -53,6 +53,26 @@ async def get_appointments_by_phone(session: AsyncSession, phone: str) -> list[d
     ]
 
 
+async def list_all_appointments(session: AsyncSession) -> list[dict]:
+    result = await session.execute(
+        select(Appointment, Doctor, Patient)
+        .join(Doctor, Appointment.doctor_id == Doctor.id)
+        .join(Patient, Appointment.patient_id == Patient.id)
+        .order_by(Appointment.start_time.desc())
+    )
+    return [
+        {
+            "appointment_id": str(appointment.id),
+            "doctor_name": doctor.name,
+            "patient_name": patient.name,
+            "patient_phone": patient.phone,
+            "start_time": appointment.start_time.astimezone(CLINIC_TZ),
+            "status": appointment.status,
+        }
+        for appointment, doctor, patient in result.all()
+    ]
+
+
 def _parse_time(value: str) -> time:
     return datetime.strptime(value, "%H:%M").time()
 

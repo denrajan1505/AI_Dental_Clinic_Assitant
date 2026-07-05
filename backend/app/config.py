@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     cors_origins: str = "http://localhost:3000"
     env: str = "development"
+    admin_password: str
 
     @property
     def cors_origin_list(self) -> list[str]:

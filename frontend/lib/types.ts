@@ -44,3 +44,12 @@ export interface ChatResponse {
   agent: string | null;
   ui?: UIPayload | null;
 }
+
+export interface AppointmentRecord {
+  appointment_id: string;
+  doctor_name: string;
+  patient_name: string;
+  patient_phone: string | null;
+  start_time: string;
+  status: string;
+}

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.agents.checkpointer import lifespan_checkpointer
-from app.api.routes import chat, clinic, conversations, doctors, health
+from app.api.routes import appointments, chat, clinic, conversations, doctors, health
 from app.config import settings
 
 logging.basicConfig(
@@ -28,7 +28,7 @@ app.add_middleware(
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "X-Admin-Password"],
 )
 
 app.include_router(health.router)
@@ -36,3 +36,4 @@ app.include_router(doctors.router)
 app.include_router(clinic.router)
 app.include_router(chat.router)
 app.include_router(conversations.router)
+app.include_router(appointments.router)
